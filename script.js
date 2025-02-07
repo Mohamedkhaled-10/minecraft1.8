@@ -2,9 +2,11 @@
 function loadGame() {
     let iframe = document.getElementById("game-frame");
     iframe.src = "EaglercraftX_1.8_u49_Offline_Signed.html";
-    
+
     iframe.onload = function () {
-        iframe.contentWindow.focus();
+        setTimeout(() => {
+            iframe.contentWindow.focus();
+        }, 500);
     };
 }
 
@@ -29,25 +31,30 @@ function toggleFullScreen() {
     }
 }
 
-// إعادة توجيه أحداث لوحة المفاتيح إلى اللعبة داخل iframe
-window.addEventListener("keydown", function (event) {
+// إرسال أحداث لوحة المفاتيح إلى `iframe`
+function sendKeyEventToGame(event, type) {
     let iframe = document.getElementById("game-frame");
-    if (iframe.contentWindow) {
-        iframe.contentWindow.postMessage({ action: "keydown", key: event.key, code: event.code }, "*");
+    if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ action: type, key: event.key, code: event.code }, "*");
     }
-});
+}
 
-window.addEventListener("keyup", function (event) {
-    let iframe = document.getElementById("game-frame");
-    if (iframe.contentWindow) {
-        iframe.contentWindow.postMessage({ action: "keyup", key: event.key, code: event.code }, "*");
-    }
-});
+// الاستماع إلى أحداث لوحة المفاتيح
+window.addEventListener("keydown", (event) => sendKeyEventToGame(event, "keydown"));
+window.addEventListener("keyup", (event) => sendKeyEventToGame(event, "keyup"));
 
-// إعادة التركيز على iframe إذا فقده
+// التأكد من إعادة التركيز على `iframe` عند الضغط على أي مكان في الصفحة
 document.addEventListener("click", function () {
     let iframe = document.getElementById("game-frame");
-    if (iframe.contentWindow) {
+    if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.focus();
+    }
+});
+
+// إعادة التركيز على `iframe` عند تحريك الماوس داخل منطقة اللعبة
+document.getElementById("game-container").addEventListener("mouseenter", function () {
+    let iframe = document.getElementById("game-frame");
+    if (iframe && iframe.contentWindow) {
         iframe.contentWindow.focus();
     }
 });
